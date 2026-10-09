@@ -2,10 +2,8 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const connect = await mongoose.connect(process.env.CONNECTION_STRING, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    const uri = process.env.CONNECTION_STRING || "mongodb://127.0.0.1:27017/skills-compatibility";
+    const connect = await mongoose.connect(uri);
 
     console.log(
       `Database connected successfully: ${connect.connection.host}/${connect.connection.name}`

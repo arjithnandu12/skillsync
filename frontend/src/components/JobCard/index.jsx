@@ -1,124 +1,170 @@
 import React, { useContext } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { AuthContext } from "../../Context/AuthContext";
-import { Card, CardContent, Typography, Chip, Button, Box } from "@mui/material";
-import { motion } from "framer-motion";
+import { AuthContext } from "../../Context/AuthContext.jsx";
+import { calculateJobMatch } from "../../utils/compatibilityHelper.js";
+import {
+  FaCheck,
+  FaTimes,
+  FaMapMarkerAlt,
+  FaBriefcase,
+  FaDollarSign,
+  FaArrowRight,
+  FaBuilding,
+  FaEdit,
+  FaTrash,
+} from "react-icons/fa";
 
-const MotionCard = motion(Card);
+const JobCard = ({ job, onDelete, onSelectJob }) => {
+  const { user, skills } = useContext(AuthContext);
 
-const JobCard = ({ job, onDelete }) => {
-  const { user } = useContext(AuthContext);
+  // Compute live compatibility score
+  const match = calculateJobMatch(skills, job);
 
-  // Check if the current user is the owner of the job post
-  const isOwner = user && user._id === job.user;
+  const isOwner = user && user._id && job.user && (user._id === job.user || user._id === job.user?._id);
 
   return (
-    <MotionCard
-      whileHover={{ scale: 1.04 }}
-      whileTap={{ scale: 0.98 }}
-      elevation={4}
-      sx={{
-        borderRadius: "20px",
-        overflow: "hidden",
-        background: "linear-gradient(135deg, #fdfbfb, #ebedee)", // Light gradient
-        color: "#1a1a1a",
-      }}
-    >
-      <CardContent>
-        {/* Title */}
-        <Typography variant="h6" fontWeight="bold" sx={{ color: "#2c3e50" }}>
-          {job.title}
-        </Typography>
-
-        {/* Company */}
-        <Typography variant="subtitle1" sx={{ color: "#34495e" }}>
-          {job.company}
-        </Typography>
-
-        {/* Location */}
-        <Typography variant="body2" sx={{ color: "#7f8c8d" }}>
-          {job.location}
-        </Typography>
-
-        {/* Salary & Job Type */}
-        <Box mt={2} display="flex" gap={1}>
-          {job.salary && (
-            <Chip
-              label={`$${job.salary}`}
-              sx={{
-                bgcolor: "#2ecc71",
-                color: "white",
-                fontWeight: "bold",
+    <div className="group relative rounded-2xl glass-panel glass-panel-hover p-6 flex flex-col justify-between border border-slate-800 transition-all duration-300">
+      
+      {/* Top Header: Company Info & Compatibility Meter */}
+      <div>
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="flex items-center space-x-3.5">
+            <img
+              src={job.logo || "https://images.unsplash.com/photo-1549923746-c502d488b3ea?w=100&h=100&fit=crop"}
+              alt={job.company}
+              className="w-12 h-12 rounded-xl object-cover border border-slate-700 bg-slate-800 p-0.5 shadow-md shrink-0"
+              onError={(e) => {
+                e.target.src = "https://images.unsplash.com/photo-1549923746-c502d488b3ea?w=100&h=100&fit=crop";
               }}
             />
-          )}
-          <Chip
-            label={job.jobType}
-            sx={{
-              bgcolor: "#9b59b6",
-              color: "white",
-              fontWeight: "bold",
-            }}
-          />
-        </Box>
+            <div>
+              <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors line-clamp-1">
+                {job.title}
+              </h3>
+              <p className="text-xs font-semibold text-slate-400 flex items-center space-x-1.5 mt-0.5">
+                <FaBuilding className="text-[11px] text-slate-500" />
+                <span>{job.company}</span>
+              </p>
+            </div>
+          </div>
 
-        {/* Description */}
-        <Typography variant="body2" sx={{ mt: 2, color: "#2c3e50", opacity: 0.85 }}>
-          {job.description}
-        </Typography>
-
-        {/* Posted Date */}
-        <Typography variant="caption" sx={{ mt: 1, display: "block", color: "#7f8c8d" }}>
-          Posted on: {new Date(job.postedAt).toLocaleDateString()}
-        </Typography>
-
-        {/* Action Buttons */}
-        <Box mt={3} display="flex" gap={2}>
-          <Button
-            component={RouterLink}
-            to={`/jobs/${job._id}`}
-            variant="contained"
-            sx={{
-              bgcolor: "#3498db",
-              "&:hover": { bgcolor: "#2980b9" },
-              borderRadius: "12px",
+          {/* Compatibility Ring / Score Badge */}
+          <div
+            className="flex flex-col items-center justify-center px-3 py-1.5 rounded-xl border shrink-0 text-center shadow-lg transition-transform group-hover:scale-105"
+            style={{
+              backgroundColor: match.badgeBg,
+              borderColor: `${match.tierColor}40`,
             }}
           >
-            View Details
-          </Button>
+            <div className="flex items-baseline space-x-0.5">
+              <span className="text-xl font-extrabold" style={{ color: match.tierColor }}>
+                {match.score}%
+              </span>
+            </div>
+            <span
+              className="text-[10px] font-bold uppercase tracking-wider leading-none mt-0.5 whitespace-nowrap"
+              style={{ color: match.tierColor }}
+            >
+              {match.matchTier.split(" ")[0]}
+            </span>
+          </div>
+        </div>
 
-          {isOwner && (
-            <>
-              <Button
-                component={RouterLink}
-                to={`/jobs/edit/${job._id}`}
-                variant="contained"
-                sx={{
-                  bgcolor: "#f1c40f",
-                  color: "black",
-                  "&:hover": { bgcolor: "#d4ac0d" },
-                  borderRadius: "12px",
-                }}
-              >
-                Edit
-              </Button>
+        {/* Badges: Location, Type, Salary */}
+        <div className="flex flex-wrap items-center gap-2 mb-4 text-xs">
+          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700/60">
+            <FaMapMarkerAlt className="text-slate-400 text-[10px]" />
+            <span>{job.location}</span>
+          </span>
 
-              <Button
-                onClick={() => onDelete(job._id)}
-                variant="contained"
-                sx={{
-                  bgcolor: "#e74c3c",
-                  "&:hover": { bgcolor: "#c0392b" },
-                  borderRadius: "12px",
-                }}
-              >
-                Delete
-              </Button>
-            </>
-          )}
-        </Box>
-      </CardContent>
-    </MotionCard>
+          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 font-medium">
+            <FaBriefcase className="text-indigo-400 text-[10px]" />
+            <span>{job.jobType}</span>
+          </span>
+
+          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-semibold">
+            <FaDollarSign className="text-emerald-400 text-[10px]" />
+            <span>{job.salaryDisplay || (job.salary ? `$${job.salary.toLocaleString()}` : "Competitive")}</span>
+          </span>
+        </div>
+
+        {/* Short Description */}
+        <p className="text-xs text-slate-400 line-clamp-2 mb-5 leading-relaxed">
+          {job.description}
+        </p>
+
+        {/* Required Skills Compatibility Comparison Matrix */}
+        <div className="mb-5 pt-3 border-t border-slate-800/80">
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Required Skills Match ({match.matchedRequired.length}/{job.requiredSkills?.length || 0})
+            </span>
+            <span className="text-[11px] font-semibold text-slate-400">
+              {match.matchedRequired.length === (job.requiredSkills?.length || 0)
+                ? "All requirements met"
+                : `${(job.requiredSkills?.length || 0) - match.matchedRequired.length} skill gap`}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            {job.requiredSkills?.map((skill, idx) => {
+              const isMatched = match.matchedRequired.some(
+                (m) => m.name.toLowerCase() === skill.toLowerCase()
+              );
+
+              return (
+                <span
+                  key={idx}
+                  className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-md text-[11px] font-medium border transition-colors ${
+                    isMatched
+                      ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/40"
+                      : "bg-rose-500/10 text-rose-300/90 border-rose-500/30"
+                  }`}
+                  title={isMatched ? `You have ${skill} in your profile` : `Missing requirement: ${skill}`}
+                >
+                  {isMatched ? (
+                    <FaCheck className="text-[9px] text-emerald-400" />
+                  ) : (
+                    <FaTimes className="text-[9px] text-rose-400" />
+                  )}
+                  <span>{skill}</span>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Actions */}
+      <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between gap-2 mt-auto">
+        <RouterLink
+          to={`/jobs/${job._id}`}
+          className="flex-1 py-2 px-3.5 rounded-xl text-xs font-bold text-center flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+        >
+          <span>Check Compatibility & Roadmap</span>
+          <FaArrowRight className="text-[10px]" />
+        </RouterLink>
+
+        {isOwner && (
+          <div className="flex items-center space-x-1 shrink-0">
+            <RouterLink
+              to={`/jobs/edit/${job._id}`}
+              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+              title="Edit Job"
+            >
+              <FaEdit className="text-xs" />
+            </RouterLink>
+            <button
+              onClick={() => onDelete(job._id)}
+              className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
+              title="Delete Job"
+            >
+              <FaTrash className="text-xs" />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
