@@ -7,7 +7,9 @@ const User = require("./models/userModel");
 const Job = require("./models/jobModel");
 
 const MONGO_URI =
-  process.env.CONNECTION_STRING || "mongodb://127.0.0.1:27017/skills-compatibility";
+  process.env.CONNECTION_STRING ||
+  process.env.MONGODB_URI ||
+  "mongodb://127.0.0.1:27017/skills-compatibility";
 
 const seedDatabase = async () => {
   try {

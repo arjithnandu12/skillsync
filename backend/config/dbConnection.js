@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const uri = process.env.CONNECTION_STRING || "mongodb://127.0.0.1:27017/skills-compatibility";
+    const uri =
+      process.env.CONNECTION_STRING ||
+      process.env.MONGODB_URI ||
+      "mongodb://127.0.0.1:27017/skills-compatibility";
     const connect = await mongoose.connect(uri);
 
     console.log(
