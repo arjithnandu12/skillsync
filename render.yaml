@@ -22,6 +22,9 @@ services:
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://skillsync-backend-0lfd.onrender.com/api
     routes:
       - type: rewrite
         source: /*

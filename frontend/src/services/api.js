@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 const API_BASE =
   import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD
-    ? 'https://jobby-zzfw.onrender.com/api'
+    ? 'https://skillsync-backend-0lfd.onrender.com/api'
     : '/api');
 
 const apiClient = axios.create({
