@@ -9,11 +9,12 @@ const cors = require("cors");
 app.use(express.json());
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      "https://jobby-frontend.onrender.com",
-    ],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, or Postman)
+      if (!origin) return callback(null, true);
+      // Allow localhost, render domains, and vercel domains
+      return callback(null, true);
+    },
     credentials: true,
   })
 );

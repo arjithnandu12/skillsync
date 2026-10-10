@@ -1,8 +1,12 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-// Use relative API URL so Vite dev proxy handles it cleanly, or fallback to full URL
-const API_BASE = '/api';
+// Use configurable API URL or production Render backend URL, with local dev proxy fallback
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? 'https://jobby-zzfw.onrender.com/api'
+    : '/api');
 
 const apiClient = axios.create({
   baseURL: API_BASE,
