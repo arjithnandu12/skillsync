@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
+    allowedHosts: ['ramble-geriatric-footbath.ngrok-free.dev', '.ngrok-free.dev', '.loca.lt', 'localhost', '127.0.0.1'],
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:5001',
